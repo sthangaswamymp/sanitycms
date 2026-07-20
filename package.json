@@ -1,0 +1,113 @@
+{
+  "name": "@marketfully/sanity-plugin",
+  "version": "1.0.0",
+  "description": "Sanity Studio v5/v6 plugin for Marketfully (formerly MotionPoint) translation integration. Allows editors to send documents for translation, monitor progress in real-time, and import completed translations back into the studio.",
+  "keywords": [
+    "sanity",
+    "sanity-plugin",
+    "translation",
+    "marketfully",
+    "motionpoint"
+  ],
+  "homepage": "https://marketfully.com",
+  "bugs": {
+    "url": "https://bitbucket.org/mprnd/sanitycmsconnector/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/mprnd/sanitycmsconnector"
+  },
+  "type": "module",
+  "license": "MIT",
+  "author": "Marketfully",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "sanity.json",
+    "src",
+    "v2-incompatible.js"
+  ],
+  "scripts": {
+    "build": "plugin-kit verify-package --silent && pkg-utils build --strict --check --clean",
+    "lint": "eslint .",
+    "analyze": "size-limit --why",
+    "clean": "rimraf dist",
+    "format": "prettier --write --cache --ignore-unknown .",
+    "link-watch": "plugin-kit link-watch",
+    "prepublishOnly": "npm run build",
+    "watch": "pkg-utils watch --strict"
+  },
+  "dependencies": {
+    "@sanity/incompatible-plugin": "^1.0.4",
+    "groqd": "^0.15.7",
+    "sanity-translations-tab": "^6.1.1",
+    "styled-components": "^6.1.15"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.4.3",
+    "@commitlint/config-conventional": "^17.4.3",
+    "@sanity/pkg-utils": "^6.0.0",
+    "@sanity/plugin-kit": "^4.0.0",
+    "@sanity/semantic-release-preset": "^4.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.52.0",
+    "@typescript-eslint/parser": "^5.52.0",
+    "eslint": "^8.34.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-config-react-app": "^6.0.0",
+    "eslint-config-sanity": "^6.0.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.1.2",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.8.4",
+    "prettier-plugin-packagejson": "^2.4.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-is": "^19.0.0",
+    "rimraf": "^4.1.2",
+    "semantic-release": "^20.1.0",
+    "size-limit": "^4.7.0",
+    "tslib": "^2.0.3",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "react": "^19",
+    "sanity": "^5 || ^6"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "eslintConfig": {
+    "extends": "react-app",
+    "rules": {
+      "@typescript-eslint/no-redeclare": "off",
+      "no-redeclare": "off"
+    }
+  },
+  "sanityPlugin": {
+    "verifyPackage": {
+      "tsc": false,
+      "terser": false,
+      "nodeEngine": false
+    }
+  }
+}
