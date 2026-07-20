@@ -59,13 +59,29 @@ client.createOrReplace({
   // even in a public dataset!
   _id: 'motionPoint.secrets',
   _type: 'motionPointSettings',
-  // Replace these with your values
+
+  // MotionPoint credentials
+  // project_id: Your MotionPoint project/customer ID — provided by MotionPoint
   project_id: 'YOUR_MOTIONPOINT_PROJECT_ID_HERE',
+
+  // base_language: The source language code of your content (e.g. 'en' for English)
   base_language: 'YOUR_MOTIONPOINT_ORIGIN_LANGUAGE_HERE',
+
+  // username: Your MotionPoint API username — provided by MotionPoint
   username: 'YOUR_MOTIONPOINT_USERNAME_HERE',
+
+  // api_token: Your MotionPoint API access token — provided by MotionPoint
   api_token: 'YOUR_MOTIONPOINT_TOKEN_HERE',
+
+  // Sanity credentials (required for importing translations back into your dataset)
+  // sanity_project_id: Your Sanity project ID — found at sanity.io/manage
   sanity_project_id: 'YOUR_SANITY_PROJECT_ID_HERE',
+
+  // sanity_dataset: The Sanity dataset to write translated documents into (e.g. 'production')
   sanity_dataset: 'YOUR_SANITY_DATASET_HERE',
+
+  // sanity_api_key: A Sanity API token with write/editor permissions
+  // Generate one at sanity.io/manage → your project → API → Tokens
   sanity_api_key: 'YOUR_SANITY_API_KEY_HERE',
 })
 ```
