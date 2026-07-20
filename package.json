@@ -1,5 +1,5 @@
 {
-  "name": "@marketfully/sanity-plugin",
+  "name": "sanity-plugin-motionpoint",
   "version": "1.0.0",
   "description": "Sanity Studio v5/v6 plugin for Marketfully (formerly MotionPoint) translation integration. Allows editors to send documents for translation, monitor progress in real-time, and import completed translations back into the studio.",
   "keywords": [
