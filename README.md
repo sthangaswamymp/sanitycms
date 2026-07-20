@@ -1,23 +1,53 @@
-# @marketfully/sanity-plugin
+> This plugin supports **Sanity Studio v5** and **Sanity Studio v6**.
 
-> Sanity Studio v5/v6 plugin for [Marketfully](https://marketfully.com) (formerly MotionPoint) translation integration.
+![MotionPoint Sanity plugin](https://bytebucket.org/MotionPoint/motionpoint-sanity-plugin/raw/02675975a7b8e63e11d2c8fe5bafdbc61e5423db/motionpoint-sanity.gif)
 
-Allows editors to send Sanity documents for translation, monitor progress in real-time, and import completed translations back into the studio.
-
-## Installation
+## Package Installation
 
 ```sh
-npm install @marketfully/sanity-plugin
+npm install sanity-plugin-motionpoint
 ```
 
-## Setup
+This plugin integrates your Sanity Studio with [MotionPoint](https://motionpoint.com) and facilitates seamless translation management by enabling you to dispatch content for translation, oversee the progress, and effortlessly retrieve the finalized translations upon completion.
 
-### 1. Add your Marketfully credentials to your dataset
+Both **Human Translation** and **Machine Translation** are fully supported by this tool, as well as **automatically publishing** the localized documents to your Sanity Studio once translation is completed.
 
-Create a file called `populateMarketfullySecrets.js` in your Studio folder:
+# Table of Contents
+
+- [Quickstart](#quickstart)
+- [Assumptions](#assumptions)
+- [Studio experience](#studio-experience)
+- [Overriding defaults](#overriding-defaults)
+- [Migrating from v3](#migrating-from-v3-to-v5v6)
+- [License](#license)
+- [Develop and test](#develop-and-test)
+
+## Quickstart
+
+### MotionPoint's Connector Requirements
+
+The MotionPoint connector requires the following:
+1. A MotionPoint username
+2. An API ID and an API access token
+
+Both can be requested by contacting MotionPoint [here](https://www.motionpoint.com/contact/) or sales@motionpoint.com. Someone from our team will contact you about your inquiry within one business day.
+
+### Installation Instructions
+
+1. Navigate to your Sanity Studio folder and run the following command:
+
+```sh
+npm install sanity-plugin-motionpoint
+```
+
+2. Ensure the plugin has access to your MotionPoint secrets. You'll want to create a document that includes your project name, organization name, and a token with appropriate access.
+
+[Please refer to the MotionPoint documentation on creating a token if you don't have one already.](https://motionpoint.com)
+
+In your Studio folder, create a file called `populateMotionPointSecrets.js` with the following contents:
 
 ```javascript
-// populateMarketfullySecrets.js
+// ./populateMotionPointSecrets.js
 // Do not commit this file to your repository
 
 import {getCliClient} from 'sanity/cli'
@@ -25,85 +55,129 @@ import {getCliClient} from 'sanity/cli'
 const client = getCliClient({apiVersion: '2024-01-01'})
 
 client.createOrReplace({
+  // The `.` in this _id will ensure the document is private
+  // even in a public dataset!
   _id: 'motionPoint.secrets',
   _type: 'motionPointSettings',
-  project_id: 'YOUR_PROJECT_ID',
-  base_language: 'en',
-  username: 'YOUR_USERNAME',
-  api_token: 'YOUR_API_TOKEN',
-  sanity_project_id: 'YOUR_SANITY_PROJECT_ID',
-  sanity_dataset: 'production',
-  sanity_api_key: 'YOUR_SANITY_API_KEY',
+  // Replace these with your values
+  project_id: 'YOUR_MOTIONPOINT_PROJECT_ID_HERE',
+  base_language: 'YOUR_MOTIONPOINT_ORIGIN_LANGUAGE_HERE',
+  username: 'YOUR_MOTIONPOINT_USERNAME_HERE',
+  api_token: 'YOUR_MOTIONPOINT_TOKEN_HERE',
+  sanity_project_id: 'YOUR_SANITY_PROJECT_ID_HERE',
+  sanity_dataset: 'YOUR_SANITY_DATASET_HERE',
+  sanity_api_key: 'YOUR_SANITY_API_KEY_HERE',
 })
 ```
 
-Run it:
+On the command line, run the file:
 
 ```sh
-npx sanity exec populateMarketfullySecrets.js --with-user-token
+npx sanity exec populateMotionPointSecrets.js --with-user-token
 ```
 
-Verify it was created using Vision Tool: `*[_id == 'motionPoint.secrets']`
+Verify that the document was created using the Vision Tool in the Studio and query `*[_id == 'motionPoint.secrets']`. Note: If you have multiple datasets, you'll have to do this across all of them.
 
-### 2. Add the Translations tab to your desk structure
+If the document was found in your dataset(s), delete `populateMotionPointSecrets.js`.
+
+If you have concerns about this being exposed to authenticated users of your studio, you can control access to this path with [role-based access control](https://www.sanity.io/docs/access-control).
+
+3. Get the MotionPoint tab on your desired document type using the [desk structure](https://www.sanity.io/docs/structure-builder-introduction). Here's an example:
 
 ```javascript
 import {DefaultDocumentNodeResolver} from 'sanity/desk'
-import {TranslationsTab, defaultDocumentLevelConfig} from '@marketfully/sanity-plugin'
+//...your other desk structure imports...
+import {TranslationsTab, defaultDocumentLevelConfig} from 'sanity-plugin-motionpoint'
 
 export const getDefaultDocumentNode: DefaultDocumentNodeResolver = (S, {schemaType}) => {
   if (schemaType === 'myTranslatableDocumentType') {
     return S.document().views([
       S.view.form(),
-      S.view
-        .component(TranslationsTab)
-        .title('Translations')
-        .options(defaultDocumentLevelConfig)
+      //...my other views -- for example, live preview, the i18n plugin, etc.,
+      S.view.component(TranslationsTab).title('MotionPoint').options(defaultDocumentLevelConfig)
     ])
   }
   return S.document()
 }
 ```
 
-## Studio Experience
+And that should do it! Go into your studio, click around, and check the document in MotionPoint (it should be under its Sanity `_id`). Once it's translated, check the import by clicking the `Import` button on your MotionPoint tab!
 
-After adding the `TranslationsTab` your editors will see a **Translations** tab on each document. From there they can:
+## Assumptions
 
-- **Send** documents to Marketfully for translation
-- **Monitor** translation progress in real-time
-- **Import** completed or partial translations back into Sanity
+To use the default config mentioned above, we assume that you are following the conventions we outline in [our documentation on localization](https://www.sanity.io/docs/localization).
 
-## Configuration Options
+### Document level translations
 
-`defaultDocumentLevelConfig` and `defaultFieldLevelConfig` are available. Both accept the following options:
+Since we often find users want to use the [Document internationalization plugin](https://www.sanity.io/plugins/document-internationalization) if they're using document-level translations, we assume that any documents you want in different languages will follow the pattern `{id-of-base-language-document}__i18n_{locale}`
 
-- `exportForTranslation` — function that serializes your document for translation
-- `importTranslation` — function that patches translated content back into Sanity
-- `adapter` — the Marketfully adapter (do not override unless you know what you're doing)
-- `secretsNamespace` — namespace for your credentials document (default: `motionPoint`)
-- `workflowOptions` — array of workflow options (e.g. Machine Translation)
+### Final note
 
-## Compatibility
+It's okay if your data doesn't follow these patterns and you don't want to change them! You will simply have to override how the plugin gets and patches back information from your documents. Please see [Overriding defaults](#overriding-defaults).
 
-| Plugin version | Sanity Studio |
-|---------------|---------------|
-| `1.x` | v5, v6 |
+## Studio experience
+
+By adding the `TranslationsTab` to your desk structure, your users will now have an additional view. The boxes at the top of the tab can be used to send translations off to MotionPoint, and once those jobs are started, they should see progress bars monitoring the progress of the jobs. They can import a partial or complete job back.
+
+## Overriding defaults
+
+To personalize this configuration it's useful to know what arguments go into `TranslationsTab` as options (the `defaultConfigs` are just wrappers for these):
+
+- `exportForTranslation`: a function that takes your document id and returns an object with `name`: the field you want to use to identify your doc in MotionPoint (by default this is `_id`) and `content`: a serialized HTML string of all the fields in your document to be translated.
+- `importTranslation`: a function that takes in `id` (your document id), `localeId` (the locale of the imported language) and `document` the translated HTML from MotionPoint. It will deserialize your document back into an object that can be patched into your Sanity data, and then executes that patch.
+- `Adapter`: An interface with methods to send things over to MotionPoint. You likely don't want to override this!
+
+There are several reasons to override these functions. More general cases are often around ensuring documents serialize and deserialize correctly. Since the serialization functions are used across all our translation plugins currently, you can find some frequently encountered scenarios at [their repository here](https://github.com/sanity-io/sanity-naive-html-serializer), along with code examples for new config.
+
+## Migrating from v3 to v5/v6
+
+### From v3 (Sanity Studio v3)
+
+If you are upgrading from `sanity-plugin-motionpoint@2.x` (Sanity Studio v3) to `4.x` (Sanity Studio v5/v6):
+
+1. Update the package:
+
+```sh
+npm install sanity-plugin-motionpoint@latest
+```
+
+2. The plugin now requires **React 19** and **Sanity Studio v5 or v6**. Make sure your Studio is on v5 or v6 before upgrading.
+
+3. Update your secrets document to include the additional fields:
+
+```javascript
+sanity_project_id: 'YOUR_SANITY_PROJECT_ID_HERE',
+sanity_dataset: 'YOUR_SANITY_DATASET_HERE',
+sanity_api_key: 'YOUR_SANITY_API_KEY_HERE',
+```
+
+4. If you are using the default configs, no other changes are required. If you are using custom serialization, you may need to update how `BaseDocumentSerializer` receives your schema — outlined in the serializer README [here](https://github.com/sanity-io/sanity-naive-html-serializer#v2-to-v3-changes).
+
+### Compatibility Matrix
+
+| Plugin version | Sanity Studio | React |
+|---------------|---------------|-------|
+| `4.x` | v5, v6 | 19 |
+| `2.x` | v3 | 18 |
 
 ## License
 
-[MIT](LICENSE) © Marketfully
+[MIT](LICENSE) © MotionPoint
 
-## Develop & Test
+## Develop & test
 
-This plugin uses [@sanity/plugin-kit](https://github.com/sanity-io/plugin-kit).
+This plugin uses [@sanity/plugin-kit](https://github.com/sanity-io/plugin-kit)
+with default configuration for build & watch scripts.
+
+See [Testing a plugin in Sanity Studio](https://github.com/sanity-io/plugin-kit#testing-a-plugin-in-sanity-studio)
+on how to run this plugin with hotreload in the studio.
+
+### Release new version
 
 ```sh
-# Install dependencies
-npm install
-
-# Build
+cd plugin
 npm run build
-
-# Watch mode
-npm run watch
+npm publish
 ```
+
+Ensure you are logged in to npm as an authorized maintainer before publishing.
