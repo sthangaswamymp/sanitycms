@@ -18,7 +18,7 @@ Both **Human Translation** and **Machine Translation** are fully supported by th
 - [Assumptions](#assumptions)
 - [Studio experience](#studio-experience)
 - [Overriding defaults](#overriding-defaults)
-- [Migrating from v3](#migrating-from-v3-to-v5v6)
+- [Troubleshooting](#troubleshooting)
 - [License](#license)
 - [Develop and test](#develop-and-test)
 
@@ -129,36 +129,25 @@ To personalize this configuration it's useful to know what arguments go into `Tr
 
 There are several reasons to override these functions. More general cases are often around ensuring documents serialize and deserialize correctly. Since the serialization functions are used across all our translation plugins currently, you can find some frequently encountered scenarios at [their repository here](https://github.com/sanity-io/sanity-naive-html-serializer), along with code examples for new config.
 
-## Migrating from v3 to v5/v6
+## Troubleshooting
 
-### From v3 (Sanity Studio v3)
+### CORS Error — API calls blocked by browser
 
-If you are upgrading from `sanity-plugin-motionpoint@2.x` (Sanity Studio v3) to `4.x` (Sanity Studio v5/v6):
+If you see an error like:
 
-1. Update the package:
-
-```sh
-npm install sanity-plugin-motionpoint@latest
+```
+Access to fetch at 'https://api.motionpoint.com/...' has been blocked by CORS policy
 ```
 
-2. The plugin now requires **React 19** and **Sanity Studio v5 or v6**. Make sure your Studio is on v5 or v6 before upgrading.
+This means your Sanity Studio domain has not been added to MotionPoint's list of allowed origins. The MotionPoint API uses a CORS allowlist to control which domains can make browser-based requests.
 
-3. Update your secrets document to include the additional fields:
+**To resolve this**, contact MotionPoint support at [support@motionpoint.com](mailto:support@motionpoint.com) or through your account representative and provide the URL of your deployed Sanity Studio (e.g. `https://your-studio.sanity.studio`). They will add it to the allowed origins configuration.
 
-```javascript
-sanity_project_id: 'YOUR_SANITY_PROJECT_ID_HERE',
-sanity_dataset: 'YOUR_SANITY_DATASET_HERE',
-sanity_api_key: 'YOUR_SANITY_API_KEY_HERE',
-```
+Common domains to provide:
+- Your production Studio URL (e.g. `https://your-studio.sanity.studio`)
+- Your local development URL (e.g. `http://localhost:3333`) — for development environments
 
-4. If you are using the default configs, no other changes are required. If you are using custom serialization, you may need to update how `BaseDocumentSerializer` receives your schema — outlined in the serializer README [here](https://github.com/sanity-io/sanity-naive-html-serializer#v2-to-v3-changes).
-
-### Compatibility Matrix
-
-| Plugin version | Sanity Studio | React |
-|---------------|---------------|-------|
-| `4.x` | v5, v6 | 19 |
-| `2.x` | v3 | 18 |
+> **Note:** This is a one-time setup per Studio domain. Once added, API calls from your Studio will work without any code changes.
 
 ## License
 
